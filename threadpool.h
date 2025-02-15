@@ -16,8 +16,8 @@
 class ThreadPool{
 private:
     bool m_stop;
-    std::vector<std::thread>m_thread;
-    std::queue<std::function<void()>>tasks;
+    std::vector<std::thread> m_thread;
+    std::queue<std::function<void()>> tasks;
     std::mutex m_mutex;
     std::condition_variable m_cv;
 
@@ -31,7 +31,8 @@ public:
                     {
                         std::function<void()>task;
                         {
-                            std::unique_lock<std::mutex>lk(m_mutex);
+                            std::unique_lock<std::mutex> lk(m_mutex);
+                            //当线程池未停止且任务队列为空时，则当前线程会被阻塞
                             m_cv.wait(lk,[this](){ return m_stop||!tasks.empty();});
                             if(m_stop&&tasks.empty()) return;
                             task=std::move(tasks.front());
@@ -52,7 +53,7 @@ public:
 
     ~ThreadPool(){
         {
-            std::unique_lock<std::mutex>lk(m_mutex);
+            std::unique_lock<std::mutex> lk(m_mutex);
             m_stop=true;
         }
         m_cv.notify_all();
